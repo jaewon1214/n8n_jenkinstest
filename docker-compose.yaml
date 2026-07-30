@@ -1,0 +1,32 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: read-plate-backend
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      WEBHOOK_URL: ${WEBHOOK_URL}
+      IMAGE_SAVE_DIR: /app/plates
+    volumes:
+      - plate_images:/app/plates
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    expose:
+      - "8000"
+
+  nginx:
+    build:
+      context: .
+      dockerfile: nginx/Dockerfile
+    container_name: read-plate-nginx
+    restart: unless-stopped
+    ports:
+      - "${NGINX_PORT:-80}:80"
+    depends_on:
+      - backend
+
+volumes:
+  plate_images:
