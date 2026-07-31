@@ -2,7 +2,7 @@ FROM jenkins/jenkins:lts-jdk21
 
 USER root
 
-# Jenkins 컨테이너 안에 Docker CLI와 Docker Compose 플러그인 설치
+# Docker CLI + Docker Compose 설치
 RUN apt-get update \
     && apt-get install -y \
         ca-certificates \
@@ -14,9 +14,7 @@ RUN apt-get update \
         -o /etc/apt/keyrings/docker.asc \
     && chmod a+r /etc/apt/keyrings/docker.asc \
     && echo \
-        "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] \
-        https://download.docker.com/linux/debian \
-        $(. /etc/os-release && echo \"$VERSION_CODENAME\") stable" \
+        "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian $(. /etc/os-release && echo "$VERSION_CODENAME") stable" \
         > /etc/apt/sources.list.d/docker.list \
     && apt-get update \
     && apt-get install -y \
@@ -24,12 +22,17 @@ RUN apt-get update \
         docker-compose-plugin \
     && rm -rf /var/lib/apt/lists/*
 
-# 초기 Jenkins 플러그인
-RUN jenkins-plugin-cli --plugins \
+USER jenkins
+
+# Jenkins 공식 업데이트 서버 사용
+ENV JENKINS_UC=https://updates.jenkins.io
+ENV JENKINS_UC_DOWNLOAD=https://updates.jenkins.io/download
+ENV JENKINS_PLUGIN_INFO=https://updates.jenkins.io/current/plugin-versions.json
+
+# 초기 플러그인 설치
+RUN jenkins-plugin-cli --verbose --plugins \
     workflow-aggregator \
     git \
     github \
     credentials-binding \
     docker-workflow
-
-USER jenkins
