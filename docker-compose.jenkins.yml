@@ -16,13 +16,14 @@ services:
       TZ: Asia/Seoul
 
     volumes:
+      # Jenkins 데이터
       - jenkins_home:/var/jenkins_home
 
-      # Docker Desktop의 Docker 엔진 사용
+      # Docker 소켓
       - /var/run/docker.sock:/var/run/docker.sock
 
-      # Windows의 현재 프로젝트를 Jenkins 내부에 연결
-      - "C:/Users/KW-20/Desktop/project123:/project123"
+      # EC2의 현재 프로젝트를 Jenkins에 마운트
+      - /home/ubuntu/n8n_jenkinstest:/project123
 
 volumes:
   jenkins_home:
